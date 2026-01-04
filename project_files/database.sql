@@ -10,6 +10,7 @@ CREATE TABLE General_User (
     password VARCHAR(255) NOT NULL,
     role ENUM('worker','employer','administrator') NOT NULL,
     is_banned TINYINT(1) DEFAULT 0,
+    is_verified TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
