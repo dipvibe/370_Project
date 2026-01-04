@@ -23,11 +23,13 @@ $role = $_SESSION['role'] ?? null;
                 <a class="nav-link" href="worker_profile.php">My Profile</a>
                 <a class="nav-link" href="apply_job.php">Find Jobs</a>
                 <a class="nav-link" href="applications.php">Applications</a>
+                <a class="nav-link" href="worker_payments.php">Payments</a>
 
             <?php elseif ($role === 'employer'): ?>
                 <a class="nav-link" href="employer_profile.php">My Profile</a>
                 <a class="nav-link" href="post_job.php">Post Job</a>
                 <a class="nav-link" href="my_jobs.php">My Jobs</a>
+                <a class="nav-link" href="employer_payments.php">Payments</a>
 
             <?php elseif ($role === 'administrator'): ?>
                 <a class="nav-link fw-semibold" href="admin_dashboard.php">
