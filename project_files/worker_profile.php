@@ -135,74 +135,127 @@ $reviews = $stmt->get_result();
 
 <?php include "navbar.php"; ?>
 
-<h2>My Profile</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+      .profile-card {
+          background: white;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      }
+      .dashboard-hero {
+          align-items: flex-start;
+          padding-top: 60px;
+          padding-bottom: 60px;
+          min-height: 100vh;
+      }
+  </style>
+</head>
+<body>
 
-<?php if ($message): ?>
-<p style="color:green"><?= htmlspecialchars($message) ?></p>
-<?php endif; ?>
+<div class="dashboard-hero">
+    <div class="container">
+        <div class="profile-card mx-auto" style="max-width: 900px;">
+            <h2 class="text-center mb-4" style="color: #6c16be;">My Profile</h2>
 
-<hr>
+            <?php if ($message): ?>
+                <div class="alert alert-success text-center"><?= htmlspecialchars($message) ?></div>
+            <?php endif; ?>
 
-<h3>Update Profile</h3>
+            <div class="row g-4">
+                <!-- Update Profile Section -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <h4 class="mb-3">Update Profile</h4>
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($name) ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($email) ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($phone ?? '') ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Experience (years)</label>
+                                <input type="number" name="experience" class="form-control" min="0" value="<?= htmlspecialchars($experience ?? 0) ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Availability</label>
+                                <input type="text" name="availability" class="form-control" value="<?= htmlspecialchars($availability ?? '') ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Skills (comma separated)</label>
+                                <input type="text" name="skills" class="form-control" placeholder="moping, dusting, cooking" value="<?= htmlspecialchars($skills ?? '') ?>" required>
+                            </div>
+                            <button type="submit" name="update_profile" class="btn btn-primary w-100" style="background-color: #6c16be; border: none;">Update Profile</button>
+                        </form>
+                    </div>
+                </div>
 
-<form method="POST">
-    Name:<br>
-    <input type="text" name="name" required><br><br>
+                <!-- Saved Profile Section -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <h4 class="mb-3">Saved Profile</h4>
+                        <ul class="list-group mb-4">
+                            <li class="list-group-item"><strong>Name:</strong> <?= htmlspecialchars($name) ?></li>
+                            <li class="list-group-item"><strong>Email:</strong> <?= htmlspecialchars($email) ?></li>
+                            <li class="list-group-item"><strong>Phone:</strong> <?= htmlspecialchars($phone ?? '-') ?></li>
+                            <li class="list-group-item"><strong>Experience:</strong> <?= htmlspecialchars($experience ?? '-') ?> years</li>
+                            <li class="list-group-item"><strong>Availability:</strong> <?= htmlspecialchars($availability ?? '-') ?></li>
+                            <li class="list-group-item"><strong>Skills:</strong> <?= htmlspecialchars($skills ?? '-') ?></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-    Email:<br>
-    <input type="email" name="email" required><br><br>
+            <!-- Reviews Section -->
+            <hr class="my-5">
+            <h3 class="mb-3">Reviews</h3>
+            
+            <?php if ($reviews->num_rows === 0): ?>
+                <p class="text-muted">No reviews yet.</p>
+            <?php else: ?>
+                <div class="list-group">
+                <?php while ($row = $reviews->fetch_assoc()): ?>
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1"><?= htmlspecialchars($row['reviewer_name']) ?></h5>
+                            <small class="text-muted"><?= date('M d, Y', strtotime($row['created_at'])) ?></small>
+                        </div>
+                        <p class="mb-1 text-warning">
+                            <?php for($i=0; $i<$row['rating']; $i++) echo '⭐'; ?>
+                            (<?= htmlspecialchars($row['rating']) ?>/5)
+                        </p>
+                        <p class="mb-1"><?= htmlspecialchars($row['comment']) ?></p>
+                    </div>
+                <?php endwhile; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
-    Phone:<br>
-    <input type="text" name="phone" required><br><br>
+<footer class="footer">
+  <p><strong>Contact Information</strong></p>
+  <p>📞 +880 1234 567890</p>
+  <p>📧 support@householdnetwork.com</p>
+  <p>📍 Dhaka, Bangladesh</p>
+  <p class="copyright">
+    © 2026 House Hold Network. All rights reserved.
+  </p>
+</footer>
 
-    Experience (years):<br>
-    <input type="number" name="experience" min="0" required><br><br>
-
-    Availability:<br>
-    <input type="text" name="availability" required><br><br>
-
-    Skills (comma separated):<br>
-    <input type="text" name="skills"
-           placeholder="moping, dusting, cooking" required><br><br>
-
-    <button type="submit" name="update_profile">Update Profile</button>
-</form>
-
-<hr>
-
-<h3>Saved Profile</h3>
-<ul>
-    <li><strong>Name:</strong> <?= htmlspecialchars($name) ?></li>
-    <li><strong>Email:</strong> <?= htmlspecialchars($email) ?></li>
-    <li><strong>Phone:</strong> <?= htmlspecialchars($phone) ?></li>
-    <li><strong>Experience:</strong> <?= htmlspecialchars($experience ?? '-') ?> years</li>
-    <li><strong>Availability:</strong> <?= htmlspecialchars($availability ?? '-') ?></li>
-    <li><strong>Skills:</strong> <?= htmlspecialchars($skills ?? '-') ?></li>
-</ul>
-
-<hr>
-
-<h3>Reviews</h3>
-
-<?php if ($reviews->num_rows === 0): ?>
-    <p>No reviews yet.</p>
-<?php else: ?>
-<table border="1" cellpadding="8">
-<tr>
-    <th>Reviewer</th>
-    <th>Rating</th>
-    <th>Comment</th>
-    <th>Date</th>
-</tr>
-
-<?php while ($row = $reviews->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($row['reviewer_name']) ?></td>
-    <td><?= htmlspecialchars($row['rating']) ?>/5</td>
-    <td><?= htmlspecialchars($row['comment']) ?></td>
-    <td><?= htmlspecialchars(date('Y-m-d', strtotime($row['created_at']))) ?></td>
-</tr>
-<?php endwhile; ?>
-</table>
-<?php endif; ?>
+</body>
+</html>
 
