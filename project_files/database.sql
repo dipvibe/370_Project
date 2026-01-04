@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS house_hold_network;
 CREATE DATABASE house_hold_network;
 USE house_hold_network;
 
@@ -109,6 +110,7 @@ CREATE TABLE Issue_Report (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     reporter_id INT NOT NULL,
     reported_user_id INT NOT NULL,
+    hire_id INT,
     description TEXT NOT NULL,
     status ENUM('open','reviewed','resolved') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
