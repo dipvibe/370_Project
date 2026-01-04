@@ -14,7 +14,7 @@ $area = $_GET['area'] ?? '';
 ================================ */
 if (isset($_POST['apply'])) {
 
-    $job_id = $_POST['job_id'];
+    $job_id    = (int)$_POST['job_id'];
     $worker_id = $_SESSION['user_id'];
 
     // Block apply if job already hired
@@ -39,9 +39,10 @@ if (isset($_POST['apply'])) {
 }
 
 /* ===============================
-   FETCH JOBS (MULTI WORK TYPES)
+   FETCH JOBS
 ================================ */
 if ($area !== '') {
+
     $stmt = $conn->prepare(
         "SELECT 
             j.job_id,
@@ -51,8 +52,8 @@ if ($area !== '') {
             j.salary_offer,
             g.name AS employer_name,
             GROUP_CONCAT(jwt.work_type SEPARATOR ', ') AS work_types,
-            r.request_id,
-            h.hire_id
+            MAX(r.request_id) AS request_id,
+            MAX(h.hire_id) AS hire_id
          FROM Job_List j
          JOIN General_User g
            ON j.employer_id = g.user_id
@@ -68,11 +69,14 @@ if ($area !== '') {
          GROUP BY j.job_id
          ORDER BY j.area ASC"
     );
+
     $like = "%$area%";
     $stmt->bind_param("is", $_SESSION['user_id'], $like);
     $stmt->execute();
     $jobs = $stmt->get_result();
+
 } else {
+
     $stmt = $conn->prepare(
         "SELECT 
             j.job_id,
@@ -82,8 +86,8 @@ if ($area !== '') {
             j.salary_offer,
             g.name AS employer_name,
             GROUP_CONCAT(jwt.work_type SEPARATOR ', ') AS work_types,
-            r.request_id,
-            h.hire_id
+            MAX(r.request_id) AS request_id,
+            MAX(h.hire_id) AS hire_id
          FROM Job_List j
          JOIN General_User g
            ON j.employer_id = g.user_id
@@ -98,6 +102,7 @@ if ($area !== '') {
          GROUP BY j.job_id
          ORDER BY j.area ASC"
     );
+
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     $jobs = $stmt->get_result();
@@ -135,14 +140,17 @@ if ($area !== '') {
 <?php while ($job = $jobs->fetch_assoc()): ?>
 <tr>
     <td>
-        <a href="employer_profile.php?employer_id=<?= $job['employer_id'] ?>">
+        <!-- ✅ FIXED PROFILE LINK -->
+        <a href="view_employer_profile.php?employer_id=<?= $job['employer_id'] ?>">
             <?= htmlspecialchars($job['employer_name']) ?>
         </a>
     </td>
+
     <td><?= htmlspecialchars($job['area']) ?></td>
     <td><?= htmlspecialchars($job['work_types'] ?? '-') ?></td>
     <td><?= htmlspecialchars($job['schedule']) ?></td>
     <td><?= htmlspecialchars($job['salary_offer']) ?></td>
+
     <td>
         <?php if ($job['hire_id']): ?>
             <span style="color:red;font-weight:bold;">Filled</span>
@@ -162,6 +170,3 @@ if ($area !== '') {
 </tr>
 <?php endwhile; ?>
 </table>
-
-
-

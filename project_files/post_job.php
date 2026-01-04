@@ -70,33 +70,83 @@ if (isset($_POST['submit'])) {
 
 <?php include "navbar.php"; ?>
 
-<h2>Post a Job</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post a Job</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+      .job-card {
+          background: white;
+          padding: 40px;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+          max-width: 600px;
+          margin: 0 auto;
+      }
+      .dashboard-hero {
+          align-items: flex-start;
+          padding-top: 60px;
+          padding-bottom: 60px;
+          min-height: 100vh;
+      }
+  </style>
+</head>
+<body>
 
-<?php if ($message): ?>
-<p style="color:green"><?= htmlspecialchars($message) ?></p>
-<?php endif; ?>
+<div class="dashboard-hero">
+    <div class="container">
+        <div class="job-card">
+            <h2 class="text-center mb-4" style="color: #6c16be;">Post a Job</h2>
 
-<form method="POST">
+            <?php if ($message): ?>
+                <div class="alert alert-success text-center"><?= htmlspecialchars($message) ?></div>
+            <?php endif; ?>
 
-    Salary Offer:<br>
-    <input type="number" name="salary" step="0.01" required><br><br>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Salary Offer</label>
+                    <input type="number" name="salary" step="0.01" class="form-control" required>
+                </div>
 
-    Work Types (comma separated):<br>
-    <input type="text" name="work_types"
-           placeholder="cleaning, cooking, babysitting"
-           required><br><br>
+                <div class="mb-3">
+                    <label class="form-label">Work Types (comma separated)</label>
+                    <input type="text" name="work_types" class="form-control" placeholder="cleaning, cooking, babysitting" required>
+                </div>
 
-    Schedule:<br>
-    <input type="text" name="schedule"
-           placeholder="e.g. 9am–3pm" required><br><br>
+                <div class="mb-3">
+                    <label class="form-label">Schedule</label>
+                    <input type="text" name="schedule" class="form-control" placeholder="e.g. 9am–3pm" required>
+                </div>
 
-    Area:<br>
-    <input type="text" name="area" required><br><br>
+                <div class="mb-3">
+                    <label class="form-label">Area</label>
+                    <input type="text" name="area" class="form-control" required>
+                </div>
 
-    House No:<br>
-    <input type="text" name="house_no"><br><br>
+                <div class="mb-3">
+                    <label class="form-label">House No</label>
+                    <input type="text" name="house_no" class="form-control">
+                </div>
 
-    <button type="submit" name="submit">Post Job</button>
+                <button type="submit" name="submit" class="btn btn-primary w-100" style="background-color: #6c16be; border: none; padding: 10px; font-size: 18px;">Post Job</button>
+            </form>
+        </div>
+    </div>
+</div>
 
-</form>
+<footer class="footer">
+  <p><strong>Contact Information</strong></p>
+  <p>📞 +880 1234 567890</p>
+  <p>📧 support@householdnetwork.com</p>
+  <p>📍 Dhaka, Bangladesh</p>
+  <p class="copyright">
+    © 2026 House Hold Network. All rights reserved.
+  </p>
+</footer>
+
+</body>
+</html>
 

@@ -78,16 +78,29 @@ $result = $stmt->get_result();
     </td>
 
     <td>
-        <?php if (!$hire_id && $row['status'] === 'pending'): ?>
-            <form method="POST" action="hire_worker.php" style="display:inline;">
-                <input type="hidden" name="request_id" value="<?= $row['request_id'] ?>">
-                <input type="hidden" name="job_id" value="<?= $job_id ?>">
-                <input type="hidden" name="worker_id" value="<?= $row['worker_id'] ?>">
-                <button type="submit" name="hire">Hire</button>
-            </form>
-        <?php else: ?>
-            —
-        <?php endif; ?>
+    <?php if (!$hire_id && $row['status'] === 'pending'): ?>
+
+        <!-- HIRE -->
+        <form method="POST" action="hire_worker.php" style="display:inline;">
+            <input type="hidden" name="request_id" value="<?= $row['request_id'] ?>">
+            <input type="hidden" name="job_id" value="<?= $job_id ?>">
+            <input type="hidden" name="worker_id" value="<?= $row['worker_id'] ?>">
+            <button type="submit" name="hire">Hire</button>
+        </form>
+
+    <?php elseif ($row['status'] === 'accepted'): ?>
+
+        <!-- HIRED + UNHIRE -->
+        <span style="color:green;font-weight:bold;">Hired</span>
+
+        <form method="POST" action="unhire_worker.php" style="display:inline;">
+            <input type="hidden" name="job_id" value="<?= $job_id ?>">
+            <button type="submit" style="margin-left:8px;">Unhire</button>
+        </form>
+
+    <?php else: ?>
+        —
+    <?php endif; ?>
     </td>
 </tr>
 <?php endwhile; ?>
