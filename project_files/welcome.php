@@ -10,133 +10,201 @@ $role    = $_SESSION['role'];
 $name    = $_SESSION['username'];
 ?>
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* ===============================
+       HERO BACKGROUND
+    ================================ */
+    .dashboard-hero {
+      background: linear-gradient(
+          rgba(0,0,0,0.55),
+          rgba(0,0,0,0.55)
+        ),
+        url('assets/after_login.png') center/cover no-repeat;
+      color: white;
+      padding: 100px 20px 140px;
+    }
+
+    .stat-card {
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+      background: #fff;
+    }
+
+    /* ===============================
+       FOOTER
+    ================================ */
+    .footer {
+      background-color: #000;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
 <?php include "navbar.php"; ?>
 
-<h2>Welcome, <?= htmlspecialchars($name) ?> 👋</h2>
-<p>Role: <strong><?= ucfirst($role) ?></strong></p>
+<!-- ===============================
+     HERO + STATS (SAME SECTION)
+================================ -->
+<div class="dashboard-hero text-center">
 
-<hr>
+  <h1 class="fw-bold">Welcome, <?= htmlspecialchars($name) ?> 👋</h1>
+  <p class="fs-4 mb-5">
+    You are logged in as
+    <strong><?= ucfirst(htmlspecialchars($role)) ?></strong>
+  </p>
 
-<?php if ($role === 'worker'): ?>
+  <div class="container">
 
-<?php
-/* ===============================
-   WORKER STATS
-================================ */
+  <?php if ($role === 'worker'): ?>
 
-// Total applications
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) FROM Job_Request WHERE worker_id = ?"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($total);
-$stmt->fetch();
-$stmt->close();
+    <?php
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM Job_Request WHERE worker_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($total);
+    $stmt->fetch();
+    $stmt->close();
 
-// Pending applications
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) FROM Job_Request 
-     WHERE worker_id = ? AND status = 'pending'"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($pending);
-$stmt->fetch();
-$stmt->close();
+    $stmt = $conn->prepare(
+        "SELECT COUNT(*) FROM Job_Request
+         WHERE worker_id = ? AND status = 'pending'"
+    );
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($pending);
+    $stmt->fetch();
+    $stmt->close();
 
-// Accepted applications
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) FROM Job_Request 
-     WHERE worker_id = ? AND status = 'accepted'"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($accepted);
-$stmt->fetch();
-$stmt->close();
-?>
+    $stmt = $conn->prepare(
+        "SELECT COUNT(*) FROM Job_Request
+         WHERE worker_id = ? AND status = 'accepted'"
+    );
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($accepted);
+    $stmt->fetch();
+    $stmt->close();
+    ?>
 
-<h3>My Activity</h3>
-<ul>
-    <li>Total Applications: <strong><?= $total ?></strong></li>
-    <li>Pending Applications: <strong><?= $pending ?></strong></li>
-    <li>Accepted Applications: <strong><?= $accepted ?></strong></li>
-</ul>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $total ?></h2>
+          <p>Total Applications</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $pending ?></h2>
+          <p>Pending Applications</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $accepted ?></h2>
+          <p>Accepted Applications</p>
+        </div>
+      </div>
+    </div>
 
-<h3>Actions</h3>
-<ul>
-    <li><a href="worker_profile.php">My Profile</a></li>
-    <li><a href="apply_job.php">Find Jobs</a></li>
-    <li><a href="applications.php">My Applications</a></li>
-    <li><a href="worker_payments.php">My Payments</a></li>
-</ul>
+  <?php elseif ($role === 'employer'): ?>
 
-<?php elseif ($role === 'employer'): ?>
+    <?php
+    $stmt = $conn->prepare(
+        "SELECT COUNT(*) FROM Job_List WHERE employer_id = ?"
+    );
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($jobCount);
+    $stmt->fetch();
+    $stmt->close();
 
-<?php
-/* ===============================
-   EMPLOYER STATS
-================================ */
+    $stmt = $conn->prepare(
+        "SELECT COUNT(*)
+         FROM Job_Request r
+         JOIN Job_List j ON r.job_id = j.job_id
+         WHERE j.employer_id = ?"
+    );
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($appCount);
+    $stmt->fetch();
+    $stmt->close();
 
-// Jobs posted
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) FROM Job_List WHERE employer_id = ?"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($jobCount);
-$stmt->fetch();
-$stmt->close();
+    $stmt = $conn->prepare(
+        "SELECT COUNT(*) FROM Hires WHERE employer_id = ?"
+    );
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($hireCount);
+    $stmt->fetch();
+    $stmt->close();
+    ?>
 
-// Applications received
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) 
-     FROM Job_Request r
-     JOIN Job_List j ON r.job_id = j.job_id
-     WHERE j.employer_id = ?"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($appCount);
-$stmt->fetch();
-$stmt->close();
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $jobCount ?></h2>
+          <p>Jobs Posted</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $appCount ?></h2>
+          <p>Applications Received</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card p-4 text-center">
+          <h2><?= $hireCount ?></h2>
+          <p>Active Hires</p>
+        </div>
+      </div>
+    </div>
 
-// Active hires
-$stmt = $conn->prepare(
-    "SELECT COUNT(*) FROM Hires WHERE employer_id = ?"
-);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($hireCount);
-$stmt->fetch();
-$stmt->close();
-?>
+  <?php elseif ($role === 'admin'): ?>
 
-<h3>My Overview</h3>
-<ul>
-    <li>Jobs Posted: <strong><?= $jobCount ?></strong></li>
-    <li>Applications Received: <strong><?= $appCount ?></strong></li>
-    <li>Active Hires: <strong><?= $hireCount ?></strong></li>
-</ul>
+    <div class="text-center">
+      <h3 class="mb-3">Administrator Panel</h3>
+      <p class="mb-4">
+        Manage users, reviews, reports and platform integrity.
+      </p>
+      <a class="btn btn-light btn-lg" href="admin_dashboard.php">
+        Go to Admin Dashboard →
+      </a>
+    </div>
 
-<h3>Actions</h3>
-<ul>
-    <li><a href="employer_profile.php">My Profile</a></li>
-    <li><a href="post_job.php">Post a Job</a></li>
-    <li><a href="my_jobs.php">My Jobs</a></li>
-</ul>
+  <?php endif; ?>
 
-<?php elseif ($role === 'admin'): ?>
+  </div>
+</div>
 
-<h3>Administrator Panel</h3>
-<p>
-    Use the Admin Dashboard to manage users and review reports.
-</p>
-<p>
-    <a href="admin_dashboard.php">Go to Admin Dashboard →</a>
-</p>
+<!-- ===============================
+     FOOTER
+================================ -->
+<footer class="footer text-center p-4">
+  <p><strong>Contact Information</strong></p>
+  <p>📞 +880 1234 567890</p>
+  <p>📧 support@householdnetwork.com</p>
+  <p>📍 Dhaka, Bangladesh</p>
+  <p class="copyright">
+    © 2026 House Hold Network. All rights reserved.
+  </p>
+</footer>
 
-<?php endif; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 
 
