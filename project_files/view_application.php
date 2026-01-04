@@ -52,59 +52,123 @@ $result = $stmt->get_result();
 
 <?php include "navbar.php"; ?>
 
-<h2>Applications for This Job</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Applications</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+      .applications-card {
+          background: white;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      }
+      .dashboard-hero {
+          align-items: flex-start;
+          padding-top: 60px;
+          padding-bottom: 60px;
+          min-height: 100vh;
+      }
+      .table thead {
+          background-color: #6c16be;
+          color: white;
+      }
+  </style>
+</head>
+<body>
 
-<table border="1" cellpadding="8">
-<tr>
-    <th>Worker</th>
-    <th>Area</th>
-    <th>Work Types</th>
-    <th>Status</th>
-    <th>Profile</th>
-    <th>Action</th>
-</tr>
+<div class="dashboard-hero">
+    <div class="container">
+        <div class="applications-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: #6c16be;">Applications for This Job</h2>
+                <a href="my_jobs.php" class="btn btn-outline-secondary">← Back to My Jobs</a>
+            </div>
 
-<?php while ($row = $result->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($row['worker_name']) ?></td>
-    <td><?= htmlspecialchars($row['area']) ?></td>
-    <td><?= htmlspecialchars($row['work_types'] ?? '-') ?></td>
-    <td><?= htmlspecialchars($row['status']) ?></td>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Worker</th>
+                            <th>Area</th>
+                            <th>Work Types</th>
+                            <th>Status</th>
+                            <th>Profile</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($row['worker_name']) ?></td>
+                            <td><?= htmlspecialchars($row['area']) ?></td>
+                            <td><?= htmlspecialchars($row['work_types'] ?? '-') ?></td>
+                            <td>
+                                <?php if ($row['status'] === 'accepted'): ?>
+                                    <span class="badge bg-success">Accepted</span>
+                                <?php elseif ($row['status'] === 'rejected'): ?>
+                                    <span class="badge bg-danger">Rejected</span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                <?php endif; ?>
+                            </td>
 
-    <td>
-        <a href="view_worker_profile.php?worker_id=<?= $row['worker_id'] ?>">
-            View Profile
-        </a>
-    </td>
+                            <td>
+                                <a href="view_worker_profile.php?worker_id=<?= $row['worker_id'] ?>" class="btn btn-sm btn-info text-white">
+                                    View Profile
+                                </a>
+                            </td>
 
-    <td>
-    <?php if (!$hire_id && $row['status'] === 'pending'): ?>
+                            <td>
+                            <?php if (!$hire_id && $row['status'] === 'pending'): ?>
 
-        <!-- HIRE -->
-        <form method="POST" action="hire_worker.php" style="display:inline;">
-            <input type="hidden" name="request_id" value="<?= $row['request_id'] ?>">
-            <input type="hidden" name="job_id" value="<?= $job_id ?>">
-            <input type="hidden" name="worker_id" value="<?= $row['worker_id'] ?>">
-            <button type="submit" name="hire">Hire</button>
-        </form>
+                                <!-- HIRE -->
+                                <form method="POST" action="hire_worker.php" style="display:inline;">
+                                    <input type="hidden" name="request_id" value="<?= $row['request_id'] ?>">
+                                    <input type="hidden" name="job_id" value="<?= $job_id ?>">
+                                    <input type="hidden" name="worker_id" value="<?= $row['worker_id'] ?>">
+                                    <button type="submit" name="hire" class="btn btn-sm btn-success">Hire</button>
+                                </form>
 
-    <?php elseif ($row['status'] === 'accepted'): ?>
+                            <?php elseif ($row['status'] === 'accepted'): ?>
 
-        <!-- HIRED + UNHIRE -->
-        <span style="color:green;font-weight:bold;">Hired</span>
+                                <!-- HIRED + UNHIRE -->
+                                <span class="text-success fw-bold me-2">Hired</span>
 
-        <form method="POST" action="unhire_worker.php" style="display:inline;">
-            <input type="hidden" name="job_id" value="<?= $job_id ?>">
-            <button type="submit" style="margin-left:8px;">Unhire</button>
-        </form>
+                                <form method="POST" action="unhire_worker.php" style="display:inline;">
+                                    <input type="hidden" name="job_id" value="<?= $job_id ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger">Unhire</button>
+                                </form>
 
-    <?php else: ?>
-        —
-    <?php endif; ?>
-    </td>
-</tr>
-<?php endwhile; ?>
-</table>
+                            <?php else: ?>
+                                <span class="text-muted">—</span>
+                            <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <?php if ($result->num_rows === 0): ?>
+                <p class="text-center text-muted mt-3">No applications received for this job yet.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
-<br>
-<a href="my_jobs.php">← Back to My Jobs</a>
+<footer class="footer">
+  <p><strong>Contact Information</strong></p>
+  <p>📞 +880 1234 567890</p>
+  <p>📧 support@householdnetwork.com</p>
+  <p>📍 Dhaka, Bangladesh</p>
+  <p class="copyright">
+    © 2026 House Hold Network. All rights reserved.
+  </p>
+</footer>
+
+</body>
+</html>
