@@ -89,6 +89,7 @@ $result = $stmt->get_result();
   <style>
       .payments-card {
           background: white;
+          color: #333;
           padding: 30px;
           border-radius: 10px;
           box-shadow: 0 0 15px rgba(0,0,0,0.2);

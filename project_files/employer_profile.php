@@ -2,10 +2,10 @@
 include "auth.php";
 include "connection.php";
 
-if ($_SESSION['role'] !== 'employer') {
-    header("Location: welcome.php");
-    exit;
-}
+// if ($_SESSION['role'] !== 'employer') {
+//     header("Location: welcome.php");
+//     exit;
+// }
 
 $user_id = $_SESSION['user_id'];
 $message = "";
@@ -104,6 +104,7 @@ $stmt->close();
   <style>
       .profile-card {
           background: white;
+          color: #333;
           padding: 30px;
           border-radius: 10px;
           box-shadow: 0 0 15px rgba(0,0,0,0.2);

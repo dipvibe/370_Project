@@ -38,6 +38,7 @@ $name    = $_SESSION['username'];
       border-radius: 14px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.15);
       background: #fff;
+      color: #333;
     }
 
     /* ===============================

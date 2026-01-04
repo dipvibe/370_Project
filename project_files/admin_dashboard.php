@@ -83,118 +83,172 @@ if ($type === 'jobs') {
 
 <?php include "navbar.php"; ?>
 
-<h2>Admin Dashboard</h2>
-<hr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+      .admin-card {
+          background: white;
+          color: #333;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      }
+      .dashboard-hero {
+          align-items: flex-start;
+          padding-top: 60px;
+          padding-bottom: 60px;
+          min-height: 100vh;
+      }
+      .stat-box {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          text-align: center;
+          border: 1px solid #dee2e6;
+          transition: transform 0.2s;
+      }
+      .stat-box:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+      .stat-box h4 {
+          margin-bottom: 0;
+          color: #6c16be;
+      }
+      .stat-box a {
+          text-decoration: none;
+          color: inherit;
+          display: block;
+      }
+  </style>
+</head>
+<body>
 
-<!-- ===============================
-     STATS
-================================ -->
-<div style="display:flex; gap:40px; margin-bottom:30px;">
-    <h4>
-        <a href="admin_dashboard.php?type=employer">
-            Employers: <strong><?= $employers ?></strong>
-        </a>
-    </h4>
+<div class="dashboard-hero">
+    <div class="container">
+        <div class="admin-card">
+            <h2 class="text-center mb-4" style="color: #6c16be;">Admin Dashboard</h2>
+            
+            <!-- Stats -->
+            <div class="row mb-5 g-4">
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <a href="admin_dashboard.php?type=employer">
+                            <h5>Employers</h5>
+                            <h2 class="fw-bold"><?= $employers ?></h2>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <a href="admin_dashboard.php?type=worker">
+                            <h5>Workers</h5>
+                            <h2 class="fw-bold"><?= $workers ?></h2>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <a href="admin_dashboard.php?type=jobs">
+                            <h5>Jobs</h5>
+                            <h2 class="fw-bold"><?= $jobs ?></h2>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-    <h4>
-        <a href="admin_dashboard.php?type=worker">
-            Workers: <strong><?= $workers ?></strong>
-        </a>
-    </h4>
+            <!-- Tables -->
+            <?php if ($type === 'employer' || $type === 'worker'): ?>
+                <h3 class="mb-3"><?= ucfirst($type) ?> List</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Profile</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php while ($u = $user_list->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($u['name']) ?></td>
+                                <td><?= htmlspecialchars($u['email']) ?></td>
+                                <td>
+                                    <?php if ($type === 'employer'): ?>
+                                        <a href="view_employer_profile.php?employer_id=<?= $u['user_id'] ?>" class="btn btn-sm btn-outline-primary">View Profile</a>
+                                    <?php else: ?>
+                                        <a href="view_worker_profile.php?worker_id=<?= $u['user_id'] ?>" class="btn btn-sm btn-outline-primary">View Profile</a>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($u['is_banned']): ?>
+                                        <span class="badge bg-danger">Banned</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">Active</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="user_id" value="<?= $u['user_id'] ?>">
+                                        <?php if ($u['is_banned']): ?>
+                                            <button name="unban" class="btn btn-sm btn-warning">Unban</button>
+                                        <?php else: ?>
+                                            <button name="ban" class="btn btn-sm btn-danger">Ban</button>
+                                        <?php endif; ?>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
 
-    <h4>
-        <a href="admin_dashboard.php?type=jobs">
-            Jobs: <strong><?= $jobs ?></strong>
-        </a>
-    </h4>
+            <?php if ($type === 'jobs'): ?>
+                <h3 class="mb-3">All Posted Jobs</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Employer</th>
+                                <th>Area</th>
+                                <th>Schedule</th>
+                                <th>Salary</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php while ($j = $job_list->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($j['employer_name']) ?></td>
+                                <td><?= htmlspecialchars($j['area']) ?></td>
+                                <td><?= htmlspecialchars($j['schedule']) ?></td>
+                                <td><?= htmlspecialchars($j['salary_offer']) ?></td>
+                                <td>
+                                    <?php if ($j['hire_id']): ?>
+                                        <span class="badge bg-success">Hired</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Open</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+        </div>
+    </div>
 </div>
 
-<!-- ===============================
-     USER LIST
-================================ -->
-<?php if ($type === 'employer' || $type === 'worker'): ?>
-
-<h3><?= ucfirst($type) ?> List</h3>
-
-<table border="1" cellpadding="8">
-<tr>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Profile</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
-
-<?php while ($u = $user_list->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($u['name']) ?></td>
-    <td><?= htmlspecialchars($u['email']) ?></td>
-
-    <td>
-        <?php if ($type === 'employer'): ?>
-            <a href="view_employer_profile.php?employer_id=<?= $u['user_id'] ?>">
-                View Profile
-            </a>
-        <?php else: ?>
-            <a href="view_worker_profile.php?worker_id=<?= $u['user_id'] ?>">
-                View Profile
-            </a>
-        <?php endif; ?>
-    </td>
-
-    <td>
-        <?= $u['is_banned']
-            ? '<span style="color:red">Banned</span>'
-            : 'Active'
-        ?>
-    </td>
-
-    <td>
-        <form method="POST" style="display:inline;">
-            <input type="hidden" name="user_id" value="<?= $u['user_id'] ?>">
-            <?php if ($u['is_banned']): ?>
-                <button name="unban">Unban</button>
-            <?php else: ?>
-                <button name="ban">Ban</button>
-            <?php endif; ?>
-        </form>
-    </td>
-</tr>
-<?php endwhile; ?>
-</table>
-
-<?php endif; ?>
-
-<!-- ===============================
-     JOB LIST
-================================ -->
-<?php if ($type === 'jobs'): ?>
-
-<h3>All Posted Jobs</h3>
-
-<table border="1" cellpadding="8">
-<tr>
-    <th>Employer</th>
-    <th>Area</th>
-    <th>Schedule</th>
-    <th>Salary</th>
-    <th>Status</th>
-</tr>
-
-<?php while ($j = $job_list->fetch_assoc()): ?>
-<tr>
-    <td><?= htmlspecialchars($j['employer_name']) ?></td>
-    <td><?= htmlspecialchars($j['area']) ?></td>
-    <td><?= htmlspecialchars($j['schedule']) ?></td>
-    <td><?= htmlspecialchars($j['salary_offer']) ?></td>
-    <td>
-        <?= $j['hire_id']
-            ? '<span style="color:green;">Hired</span>'
-            : 'Open'
-        ?>
-    </td>
-</tr>
-<?php endwhile; ?>
-</table>
-
-<?php endif; ?>
+</body>
+</html>
