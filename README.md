@@ -18,7 +18,7 @@ Follow these steps to get the project running on your local machine.
 ### 1. Clone or Download the Repository
 If you haven't already, download the project files to your computer.
 ```bash
-git clone <https://github.com/dipvibe/370_Project.git>
+git clone https://github.com/dipvibe/370_Project.git
 cd 370_project
 ```
 
