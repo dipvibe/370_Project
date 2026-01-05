@@ -1,6 +1,7 @@
 <?php
 session_start();
 include "connection.php";
+include "mail_config.php"; // PHPMailer configuration
 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     header("Location: welcome.php");
@@ -8,6 +9,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 }
 
 $error = "";
+$success = "";
 
 if (isset($_POST['submit'])) {
     $name     = trim($_POST['name']);
@@ -27,12 +29,15 @@ if (isset($_POST['submit'])) {
             $error = "Email already exists.";
         } else {
             $hash = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Generate verification token
+            $verification_token = bin2hex(random_bytes(32));
 
             $stmt = $conn->prepare(
-                "INSERT INTO General_User (name, email, address, password, role)
-                 VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO General_User (name, email, address, password, role, verification_token)
+                 VALUES (?, ?, ?, ?, ?, ?)"
             );
-            $stmt->bind_param("sssss", $name, $email, $address, $hash, $role);
+            $stmt->bind_param("ssssss", $name, $email, $address, $hash, $role, $verification_token);
 
             if ($stmt->execute()) {
                 $user_id = $stmt->insert_id;
@@ -44,9 +49,16 @@ if (isset($_POST['submit'])) {
                 } elseif ($role === 'administrator') {
                     $conn->query("INSERT INTO Administrator (user_id) VALUES ($user_id)");
                 }
-
-                header("Location: login.php");
-                exit;
+                
+                // Send verification email
+                $emailSent = sendVerificationEmail($email, $name, $verification_token);
+                if ($emailSent) {
+                    $success = "Registration successful! Please check your email to verify your account.";
+                } else {
+                    // Email failed but account created - show token for testing
+                    $success = "Registration successful! <br><strong>Click below to verify your account:</strong><br>
+                    <a href='verify_email.php?token=$verification_token' class='btn btn-success mt-2'>✓ Verify Email Now</a>";
+                }
             } else {
                 $error = "Signup failed.";
             }
@@ -74,6 +86,10 @@ if (isset($_POST['submit'])) {
 
     <?php if ($error): ?>
       <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+    
+    <?php if ($success): ?>
+      <div class="alert alert-success"><?= $success ?></div>
     <?php endif; ?>
 
     <form method="POST">

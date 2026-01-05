@@ -11,6 +11,7 @@ CREATE TABLE General_User (
     role ENUM('worker','employer','administrator') NOT NULL,
     is_banned TINYINT(1) DEFAULT 0,
     is_verified TINYINT(1) DEFAULT 0,
+    verification_token VARCHAR(64) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -8,13 +8,19 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 }
 
 $error = "";
+$success = "";
+
+// Check for success message from email verification
+if (isset($_GET['verified']) && $_GET['verified'] == '1') {
+    $success = "Email verified successfully! You can now login.";
+}
 
 if (isset($_POST['submit'])) {
     $login    = trim($_POST['login']);
     $password = $_POST['password'];
 
     $stmt = $conn->prepare(
-        "SELECT user_id, name, password, role
+        "SELECT user_id, name, password, role, is_verified
          FROM General_User
          WHERE email = ? OR name = ?"
     );
@@ -25,15 +31,23 @@ if (isset($_POST['submit'])) {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
-            $_SESSION['loggedin'] = true;
-            $_SESSION['user_id']  = $user['user_id'];
-            $_SESSION['username'] = $user['name'];
-            $_SESSION['role']     = $user['role'];
-            header("Location: welcome.php");
-            exit;
+            // Check if email is verified
+            if ($user['is_verified'] == 0) {
+                $error = "Please verify your email before logging in. Check your inbox for the verification link.";
+            } else {
+                $_SESSION['loggedin'] = true;
+                $_SESSION['user_id']  = $user['user_id'];
+                $_SESSION['username'] = $user['name'];
+                $_SESSION['role']     = $user['role'];
+                header("Location: welcome.php");
+                exit;
+            }
+        } else {
+            $error = "Invalid name/email or password.";
         }
+    } else {
+        $error = "Invalid name/email or password.";
     }
-    $error = "Invalid name/email or password.";
 }
 ?>
 
@@ -54,6 +68,10 @@ if (isset($_POST['submit'])) {
   <div id="form">
     <h1>Login</h1>
 
+    <?php if ($success): ?>
+      <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
+    
     <?php if ($error): ?>
       <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
