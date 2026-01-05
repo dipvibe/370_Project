@@ -129,10 +129,114 @@ A robust logic ensures fair reporting:
 
 ### Database Schema
 The application uses a relational database with the following key tables:
-*   `General_User`: Stores common user data (login, role).
+*   `General_User`: Stores common user data (login, role, verification status).
 *   `Worker` / `Employer`: Extension tables for role-specific data.
 *   `Job_List`: Stores job postings.
 *   `Job_Request`: Manages job applications.
 *   `Hires`: Tracks active employment contracts.
 *   `Review`: Stores ratings and comments.
 *   `Issue_Report`: Manages disputes and complaints.
+
+---
+
+## 📧 Email Verification Setup
+
+The application includes an email verification system to ensure users provide valid email addresses during registration. This section explains how to configure it.
+
+### How Email Verification Works
+
+1.  **User Signs Up**: When a user registers, the system generates a unique 64-character verification token and stores it in the database along with `is_verified = 0`.
+2.  **Email Sent**: A verification email containing a unique link is sent to the user's email address.
+3.  **User Clicks Link**: The link directs to `verify_email.php?token=<unique_token>`.
+4.  **Verification Complete**: The system validates the token, sets `is_verified = 1`, and clears the token from the database.
+5.  **Login Allowed**: Users can only log in after their email is verified.
+
+### Files Involved
+| File | Purpose |
+|------|---------|
+| `mail_config.php` | SMTP configuration and email sending functions |
+| `signup.php` | Generates token and triggers verification email |
+| `verify_email.php` | Validates token and activates account |
+| `resend_verification.php` | Allows users to request a new verification email |
+| `login.php` | Checks `is_verified` status before allowing login |
+
+### Configuration Steps
+
+#### Step 1: Get Gmail App Password
+
+Since Gmail blocks regular password authentication for third-party apps, you need to create an **App Password**.
+
+1.  **Enable 2-Step Verification** on your Google Account:
+    *   Go to [Google Account Security](https://myaccount.google.com/security)
+    *   Click on **2-Step Verification** and follow the setup process
+
+2.  **Generate App Password**:
+    *   Go to [App Passwords](https://myaccount.google.com/apppasswords)
+    *   Sign in if prompted
+    *   Under "Select app", choose **Mail**
+    *   Under "Select device", choose **Other (Custom name)**
+    *   Enter a name like `Household Network`
+    *   Click **Generate**
+    *   **Copy the 16-character password** (e.g., `abcd efgh ijkl mnop`)
+
+    > ⚠️ **Important**: This password is shown only once. Save it securely!
+
+#### Step 2: Configure `mail_config.php`
+
+Open `project_files/mail_config.php` and update the SMTP credentials:
+
+```php
+// Inside the sendEmail() function, update these lines:
+$mail->Username   = 'your-gmail@gmail.com';     // Your Gmail address
+$mail->Password   = 'abcdefghijklmnop';         // 16-char App Password (no spaces)
+
+// Also update the setFrom line:
+$mail->setFrom('your-gmail@gmail.com', MAIL_FROM_NAME);
+```
+
+#### Step 3: Test the Configuration
+
+You can test if emails are working by running this command in the terminal:
+
+```bash
+cd project_files
+php -r "include 'mail_config.php'; var_dump(sendVerificationEmail('test@example.com', 'Test', 'abc123'));"
+```
+
+If it returns `bool(true)`, emails are working!
+
+### SMTP Settings Reference
+
+| Setting | Value |
+|---------|-------|
+| Host | `smtp.gmail.com` |
+| Port | `587` |
+| Encryption | `STARTTLS` |
+| Authentication | Required (Gmail + App Password) |
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "Authentication failed" | Ensure you're using an App Password, not your regular Gmail password |
+| "Connection timed out" | Check if your firewall/antivirus is blocking port 587 |
+| "Less secure app blocked" | You must use App Password with 2-Step Verification enabled |
+| Email goes to spam | Add the sender email to contacts, or check spam folder |
+
+### Skipping Email Verification (For Local Testing)
+
+If you don't want to set up Gmail SMTP for local development:
+
+1.  After signing up, a **"Verify Email Now"** button is displayed on the success message.
+2.  Simply click this button to verify the account without receiving an actual email.
+
+Alternatively, you can manually verify a user in the database:
+```sql
+UPDATE General_User SET is_verified = 1 WHERE email = 'user@example.com';
+```
+
+### PHPMailer Library
+
+This project uses **PHPMailer** for sending emails. It's already included in the `vendor/phpmailer/` directory—no additional installation required.
+
+> **Note**: The `vendor/` folder is local to this project only. Nothing is installed globally on your system.
