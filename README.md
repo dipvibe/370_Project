@@ -240,3 +240,46 @@ UPDATE General_User SET is_verified = 1 WHERE email = 'user@example.com';
 This project uses **PHPMailer** for sending emails. It's already included in the `vendor/phpmailer/` directory—no additional installation required.
 
 > **Note**: The `vendor/` folder is local to this project only. Nothing is installed globally on your system.
+
+---
+
+## 🧪 Development & Testing Tools
+
+### Generate Demo Data
+
+To quickly populate the database with sample data for testing, use the `generate_demo_data.php` script.
+
+**How to use:**
+1.  Make sure your database is set up and empty (or freshly imported from `database.sql`).
+2.  Visit: [http://localhost:8000/generate_demo_data.php](http://localhost:8000/generate_demo_data.php)
+3.  The script will create:
+    *   **1 Administrator** account
+    *   **5 Employer** accounts
+    *   **5 Worker** accounts (with skills)
+    *   **7 Job listings** (with various work types)
+    *   **Sample applications** (pending, accepted, rejected)
+    *   **Active hires** with joining dates
+    *   **Reviews** between employers and workers
+    *   **Issue reports** for testing the dispute system
+
+**Demo Login Credentials:**
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@admin.com` | `1234` |
+| Employer | `john@example.com` | `1234` |
+| Employer | `jane@example.com` | `1234` |
+| Worker | `karim@worker.com` | `1234` |
+| Worker | `fatima@worker.com` | `1234` |
+
+> All demo accounts are pre-verified (`is_verified = 1`), so you can log in immediately.
+
+### Database Viewer (Development Only)
+
+The `view_database.php` file provides a quick way to inspect all database tables during development.
+
+**How to use:**
+*   Visit: [http://localhost:8000/view_database.php](http://localhost:8000/view_database.php)
+*   This displays all records from every table in a readable format.
+
+> ⚠️ **Security Warning**: This file should be **removed or disabled** before deploying to production, as it exposes all database contents without authentication.
